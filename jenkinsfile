@@ -59,7 +59,7 @@ pipeline {
                     fi
                     popd
 
-                    echo "export PROVISION_STATUS=${{PROVISION_STATUS}}" >> ./vars.sh
+                    echo "export PROVISION_STATUS=${PROVISION_STATUS}" >> ./vars.sh
                 '''
             }
         }
