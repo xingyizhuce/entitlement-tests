@@ -1,14 +1,14 @@
 import com.redhat.jenkins.plugins.ci.messaging.MessagingProviderOverrides;
 MessagingProviderOverrides po = new MessagingProviderOverrides('Consumer.rh-jenkins-ci-plugin.cb8a05ac-493c-42ee-9529-0aa113fc35ba.VirtualTopic.qe.ci.>');
-pipeline {{
-    agent {{ label "linchpin" }}
-    options {{
+pipeline {
+    agent { label "linchpin" }
+    options {
         timestamps()
         ansiColor('xterm')
-    }}
-    stages {{
-        stage('Preparation'){{
-            steps {{
+    }
+    stages {
+        stage('Preparation'){
+            steps {
                 cleanWs()
                 sh '''#!/bin/bash
                      git clone http://git.app.eng.bos.redhat.com/git/entitlement-tests.git
@@ -30,11 +30,11 @@ pipeline {{
                          echo "export PROVISION_STATUS=0" >> ./vars.sh
                      fi
                 '''
-            }}
-        }}
-        stage('Provision') {{
-            when {{ expression {{ env.Testing_System == '' }} }}
-            steps {{
+            }
+        }
+        stage('Provision') {
+            when { expression { env.Testing_System == '' } }
+            steps {
                 sh '''#!/bin/bash
                     source ./vars.sh
 
@@ -61,11 +61,11 @@ pipeline {{
 
                     echo "export PROVISION_STATUS=${{PROVISION_STATUS}}" >> ./vars.sh
                 '''
-            }}
-        }}
+            }
+        }
 
-        stage('Testing') {{
-            steps {{
+        stage('Testing') {
+            steps {
                 sh '''#!/bin/bash
                     source ./vars.sh
                     if [ "$PROVISION_STATUS" == 0 ]; then
@@ -113,12 +113,12 @@ pipeline {{
                         exit 1
                     fi
                 '''
-            }}
-        }}
-    }}
-    post {{
-        always {{
-            script {{
+            }
+        }
+    }
+    post {
+        always {
+            script {
                 importPolarionXUnit files: 'nosetests.xml',
                     wait: true,
                     mark: false,
@@ -133,7 +133,7 @@ pipeline {{
                     timeout: 60
 
                 archiveArtifacts artifacts: '*.txt, *.json, *.xml, **/redhat.repo, **/**/**/*.log, **/manifest/*.xml, **/manifest/*.json'
-            }}
-        }}
-    }}
-}}
+            }
+        }
+    }
+}
