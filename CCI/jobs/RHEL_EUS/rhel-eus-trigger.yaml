@@ -1,0 +1,110 @@
+- job-template:
+   name: EntitlementEUSTestingTrigger
+   node: linchpin
+   wrappers:
+        - ansicolor
+        - workspace-cleanup
+   parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/home/ftan/eus/manifest/eus_filter_manifest.json
+            description: It should be a json format file. and if no 'Product_ID' and 'Variant' parameters, will do the testing according to this manifest content.
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - string:
+            name: Release_Version
+            default: 
+            description: Optional. Specify the release version, if the manifest requires testing on specific release(such as 6.8, 7.3).
+        - string:
+            name: Product_ID
+            default: 
+            description: Optional. You can specify 'Product_ID' only, or use it together with the following 'RHEL_Variant' parameter. And you can input 1 or more PIDs separated by comma.
+        - choice:
+            name: Product_Type
+            choices:
+              - RHEL6
+              - RHEL7
+              - RHEL8
+              - RHEL-ALT
+            description: Select Product Type(RHEL, other add-on products), most tests are RHEL.
+        - choice:
+            name: CDN
+            choices:
+              - Prod
+            description:
+        - choice:
+            name: Candlepin
+            choices:
+              - Stage
+              - Prod
+            description:
+        - extended-choice:
+            name: RHEL_Variant
+            description: Optional. You can specify 'RHEL_Variant' only, or use it together with above 'Product_ID' parameter.
+            type: 'PT_CHECKBOX'
+            value: Server-i386,Server-x86_64,Server-ppc64,Server-ppc64le,Server-aarch64,Server-s390x,Client-i386,Client-x86_64,Workstation-i386,Workstation-x86_64,ComputeNode-x86_64
+            visible-item-count: "11"
+   scm:
+        - git:
+            url: 'http://git.app.eng.bos.redhat.com/git/entitlement-tests.git'
+            branches:
+                - origin/master
+            basedir: entitlement-tests
+            git-config-name: 'ftan'
+            git-config-email: 'ftan@redhat.com'
+   builders:
+        - shell: |
+            #!/bin/bash
+            export Manifest_URL=$Manifest_URL
+            export Distro=$Distro
+            export CDN=$CDN
+            export Candlepin=$Candlepin
+            export Release_Version=$Release_Version
+            export Product_ID=$Product_ID
+            export RHEL_Variant=$RHEL_Variant
+
+            python $WORKSPACE/entitlement-tests/analyze_testing.py eus
+
+   publishers:
+      - archive:
+          artifacts: 'manifest/*.json, *.properties'
+          allow-empty: 'true'
+      - trigger-parameterized-builds:
+          - project: 'EntitlementEUS-Server_x86_64'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Server-x86_64.properties
+            fail-on-missing: true
+          - project: 'EntitlementEUS-Server_i386'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Server-i386.properties
+            fail-on-missing: true
+          - project: 'EntitlementEUS-Server_ppc64'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Server-ppc64.properties
+            fail-on-missing: true 
+          - project: 'EntitlementEUS-Server_ppc64le'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Server-ppc64le.properties
+            fail-on-missing: true 
+          - project: 'EntitlementEUS-Server_s390x'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Server-s390x.properties
+            fail-on-missing: true 
+          - project: 'EntitlementEUS-ComputeNode_x86_64'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: ComputeNode-x86_64.properties
+            fail-on-missing: true 
+
+- project:
+   name: EntitlementEUSTestingTriggerJobs
+   jobs:
+    - EntitlementEUSTestingTrigger
+

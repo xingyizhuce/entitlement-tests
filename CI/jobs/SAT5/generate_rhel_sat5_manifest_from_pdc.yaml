@@ -1,0 +1,63 @@
+- job-template:
+    name: 'EntitlementSAT5_generate_rhel_manifest_from_pdc'
+    node: entitlement
+    description: |
+        Purpose: Generate rhel manifest json files from PDC for RHN/SAT5 entitlement testing.
+    concurrent: true
+    scm:
+        - git:
+            url: 'http://git.app.eng.bos.redhat.com/git/ci-ops-central.git'
+            branches:
+                - origin/master
+            basedir: ci-ops-central
+        - git:
+            url: 'http://git.app.eng.bos.redhat.com/git/job-runner.git'
+            branches:
+                - origin/master
+            basedir: job-runner
+        - git:
+            url: 'http://git.app.eng.bos.redhat.com/git/entitlement-tests.git'
+            branches:
+                - origin/master
+            basedir: entitlement-tests
+
+    parameters:
+    - string:
+        name: Distro
+        default: RHEL-6.8-20160414.0
+        description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+    - choice:
+        name: Test_Type
+        choices:
+        - Beta
+        - HTB
+        - GA
+        description: Optional. Select Test_Type if needed, will set it as GA if leave it null.
+    - choice:
+        name: Shadow
+        choices:
+        - "Yes"
+        - "No"
+        description: Optional. Select Shadow Type is true or false.
+
+    builders:
+        - shell: |
+            #!/bin/bash
+            # Export testing environment variables
+            export Distro=$Distro
+            export Shadow=$Shadow
+            export Test_Type=$Test_Type
+            if [ "$Shadow" = "Yes" ];then
+              python $WORKSPACE/entitlement-tests/Tools/rhn_manifest/ManifestCreate.py  -c $Distro -s
+            elif [ "$Shadow" = "No" ];then
+              python $WORKSPACE/entitlement-tests/Tools/rhn_manifest/ManifestCreate.py  -c $Distro
+            fi
+    wrappers:
+        - ansicolor
+        - workspace-cleanup
+        - timestamps
+
+- project:
+   name: Entitlement_generate_rhel_manifest_project
+   jobs:
+    - EntitlementSAT5_generate_rhel_manifest_from_pdc

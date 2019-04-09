@@ -1,0 +1,145 @@
+- job-template:
+   name: RHEL_EntitlementSAT5TestingTrigger
+   node: linchpin
+   wrappers:
+        - ansicolor
+        - workspace-cleanup
+   parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description: It should be a json format file, and if no specific Variant(s) selected in the 'RHEL_Variant' field, will do the testing according to this manifest content.
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - string:
+            name: SAT5_Server
+            default: cloud-qe-01.idm.lab.eng.rdu2.redhat.com
+            description: Fill in the hostname of Satellite Server 5 here, such as cloud-qe-01.idm.lab.eng.rdu2.redhat.com.
+        - string:
+            name: SAT5_Server_Username
+            default:
+            description: Fill in the username of Satellite 5 Server here. Note that this option is optional, you can set username/password to register for testing or just use below activation key.
+        - string:
+            name: SAT5_Server_Password
+            default:
+            description: Fill in above username's password of Satellite 5 Server here. Note that this option is optional, you can set username/password to register for testing or just use below activation key.
+        - string:
+            name: SAT5_Activation_Key
+            default:
+            description: Fill in the activation keys created in Satellite 5 Server with the format - "variant1-arch1":"activation_key1","variant2-arch2":"activation_key2", for example, "server-x86_64":"1-rhelentqe_127_beta_x86_64", "server-s390x":"1-rhelentqe_127_beta_s390x", "server-ppc64le":"1-rhelentqe_127_beta_ppc64le". Note that RHEL8 can only use activation key to register against Satellite 5.8 server, and please take the variant as "server" for all rhel8 arches.
+        - choice:
+            name: Product_Type
+            choices:
+              - RHEL7
+              - RHEL8
+            description: Select RHEL Product Type.
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Test_Type
+            choices:
+              - Beta
+              - HTB
+              - GA
+            description: Optional. Select Test_Type if needed, will set it as GA if leave it null.
+        - string:
+            name: Compose_Version
+            default:
+            description: The compose version will be used to compose the polarion test run title, please set the value like 'Beta1.0', 'Beta 1.0', 'Beta10', 'Snapshot1.3', 'RC1.1', etc.
+        - choice:
+            name: CDN
+            choices:
+              - Prod
+              - QA
+              - Stage
+            description: Select CDN the SAT5 server content is sync'ed from.
+        - extended-choice:
+            name: RHEL_Variant
+            description: Optional
+            type: 'PT_CHECKBOX'
+            value: Server-i386,Server-x86_64,Server-ppc64,Server-ppc64le,Server-aarch64,Server-s390x,Client-i386,Client-x86_64,Workstation-i386,Workstation-x86_64,ComputeNode-x86_64
+            visible-item-count: "11"
+   scm:
+        - git:
+            url: 'http://git.app.eng.bos.redhat.com/git/entitlement-tests.git'
+            branches:
+                - origin/master
+            basedir: entitlement-tests
+            git-config-name: 'ftan'
+            git-config-email: 'ftan@redhat.com'
+   builders:
+        - shell: |
+            #!/bin/bash
+            python $WORKSPACE/entitlement-tests/analyze_testing.py sat5
+
+   publishers:
+      - archive:
+          artifacts: 'manifest/*.json, *.properties'
+          allow-empty: 'true'
+      - trigger-parameterized-builds:
+          - project: 'RHEL-EntitlementSAT5-Server_x86_64'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Server-x86_64.properties
+            fail-on-missing: true
+          - project: 'RHEL-EntitlementSAT5-Server_i386'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Server-i386.properties
+            fail-on-missing: true
+          - project: 'RHEL-EntitlementSAT5-Server_ppc64'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Server-ppc64.properties
+            fail-on-missing: true
+          - project: 'RHEL-EntitlementSAT5-Server_ppc64le'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Server-ppc64le.properties
+            fail-on-missing: true
+          - project: 'RHEL-EntitlementSAT5-Server_aarch64'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Server-aarch64.properties
+            fail-on-missing: true
+          - project: 'RHEL-EntitlementSAT5-Server_s390x'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Server-s390x.properties
+            fail-on-missing: true
+          - project: 'RHEL-EntitlementSAT5-Client_x86_64'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Client-x86_64.properties
+            fail-on-missing: true
+          - project: 'RHEL-EntitlementSAT5-Client_i386'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Client-i386.properties
+            fail-on-missing: true
+          - project: 'RHEL-EntitlementSAT5-Workstation_x86_64'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Workstation-x86_64.properties
+            fail-on-missing: true
+          - project: 'RHEL-EntitlementSAT5-Workstation_i386'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: Workstation-i386.properties
+            fail-on-missing: true
+          - project: 'RHEL-EntitlementSAT5-ComputeNode_x86_64'
+            current-parameters: true
+            condition: 'SUCCESS'
+            property-file: ComputeNode-x86_64.properties
+            fail-on-missing: true
+- project:
+   name: EntitlementTestingTriggerJobs
+   jobs:
+    - RHEL_EntitlementSAT5TestingTrigger
+

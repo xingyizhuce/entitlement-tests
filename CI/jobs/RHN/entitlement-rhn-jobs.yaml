@@ -1,0 +1,516 @@
+- job-template:
+    name: 'EntitlementRHN-Server_x86_64'
+    defaults: entitlement-rhn-base
+    node: entitlement
+    parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description: 
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - choice:
+            name: RHN
+            choices:
+              - QA
+              - Stage
+              - Live
+            description: RHN QA(https://xmlrpc.rhn.qa.redhat.com/XMLRPC), RHN Stage(https://xmlrpc.rhn.stage.redhat.com/XMLRPC), RHN Live(https://xmlrpc.rhn.redhat.com/XMLRPC)
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Variant
+            choices:
+              - Server
+            description:
+        - choice:
+            name: Arch
+            choices:
+              - x86_64
+            description:
+        - string:
+            name: Testing_System
+            default:
+            description: Optional, fill in the hostname or IP of one system which has correct RHEL version and arch here, then will do testing on it rather than provison beaker system.
+        - string:
+            name: Password
+            default: QwAo2U6GRxyNPKiZaOCx
+            description: Optional, used for Testing_System, the default value above is beaker's default password, please modify it if needed, but please make sure correct password here.
+
+- job-template:
+    name: 'EntitlementRHN-Server_i386'
+    defaults: entitlement-rhn-base
+    node: entitlement
+    parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description:
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - choice:
+            name: RHN
+            choices:
+              - QA
+              - Stage
+              - Live
+            description: RHN QA(https://xmlrpc.rhn.qa.redhat.com/XMLRPC), RHN Stage(https://xmlrpc.rhn.stage.redhat.com/XMLRPC), RHN Live(https://xmlrpc.rhn.redhat.com/XMLRPC)
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Variant
+            choices:
+              - Server
+            description:
+        - choice:
+            name: Arch
+            choices:
+              - i386
+            description:
+        - string:
+            name: Testing_System
+            default:
+            description: Optional, fill in the hostname or IP of one system which has correct RHEL version and arch here, then will do testing on it rather than provison beaker system.
+        - string:
+            name: Password
+            default: QwAo2U6GRxyNPKiZaOCx
+            description: Optional, used for Testing_System, the default value above is beaker's default password, please modify it if needed, but please make sure correct password here.
+
+
+- job-template:
+    name: 'EntitlementRHN-Server_ppc64'
+    defaults: entitlement-rhn-base
+    node: entitlement
+    parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description:
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - choice:
+            name: RHN
+            choices:
+              - QA
+              - Stage
+              - Live
+            description: RHN QA(https://xmlrpc.rhn.qa.redhat.com/XMLRPC), RHN Stage(https://xmlrpc.rhn.stage.redhat.com/XMLRPC), RHN Live(https://xmlrpc.rhn.redhat.com/XMLRPC)
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Variant
+            choices:
+              - Server
+            description:
+        - choice:
+            name: Arch
+            choices:
+              - ppc64
+            description:
+        - string:
+            name: Testing_System
+            default:
+            description: Optional, fill in the hostname or IP of one system which has correct RHEL version and arch here, then will do testing on it rather than provison beaker system.
+        - string:
+            name: Password
+            default: QwAo2U6GRxyNPKiZaOCx
+            description: Optional, used for Testing_System, the default value above is beaker's default password, please modify it if needed, but please make sure correct password here.
+
+- job-template:
+    name: 'EntitlementRHN-Server_ppc64le'
+    defaults: entitlement-rhn-base
+    node: entitlement
+    parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description:
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - choice:
+            name: RHN
+            choices:
+              - QA
+              - Stage
+              - Live
+            description: RHN QA(https://xmlrpc.rhn.qa.redhat.com/XMLRPC), RHN Stage(https://xmlrpc.rhn.stage.redhat.com/XMLRPC), RHN Live(https://xmlrpc.rhn.redhat.com/XMLRPC)
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Variant
+            choices:
+              - Server
+            description:
+        - choice:
+            name: Arch
+            choices:
+              - ppc64le
+            description:
+        - string:
+            name: Testing_System
+            default:
+            description: Optional, fill in the hostname or IP of one system which has correct RHEL version and arch here, then will do testing on it rather than provison beaker system.
+        - string:
+            name: Password
+            default: QwAo2U6GRxyNPKiZaOCx
+            description: Optional, used for Testing_System, the default value above is beaker's default password, please modify it if needed, but please make sure correct password here.
+
+- job-template:
+    name: 'EntitlementRHN-Server_aarch64'
+    defaults: entitlement-rhn-base
+    node: entitlement
+    parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description:
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - choice:
+            name: RHN
+            choices:
+              - QA
+              - Stage
+              - Live
+            description: RHN QA(https://xmlrpc.rhn.qa.redhat.com/XMLRPC), RHN Stage(https://xmlrpc.rhn.stage.redhat.com/XMLRPC), RHN Live(https://xmlrpc.rhn.redhat.com/XMLRPC)
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Variant
+            choices:
+              - Server
+            description:
+        - choice:
+            name: Arch
+            choices:
+              - arch64
+            description:
+        - string:
+            name: Testing_System
+            default:
+            description: Optional, fill in the hostname or IP of one system which has correct RHEL version and arch here, then will do testing on it rather than provison beaker system.
+        - string:
+            name: Password
+            default: QwAo2U6GRxyNPKiZaOCx
+            description: Optional, used for Testing_System, the default value above is beaker's default password, please modify it if needed, but please make sure correct password here.
+
+- job-template:
+    name: 'EntitlementRHN-Server_s390x'
+    defaults: entitlement-rhn-base
+    node: entitlement
+    parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description:
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - choice:
+            name: RHN
+            choices:
+              - QA
+              - Stage
+              - Live
+            description: RHN QA(https://xmlrpc.rhn.qa.redhat.com/XMLRPC), RHN Stage(https://xmlrpc.rhn.stage.redhat.com/XMLRPC), RHN Live(https://xmlrpc.rhn.redhat.com/XMLRPC)
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Variant
+            choices:
+              - Server
+            description:
+        - choice:
+            name: Arch
+            choices:
+              - s390x
+            description:
+        - string:
+            name: Testing_System
+            default:
+            description: Optional, fill in the hostname or IP of one system which has correct RHEL version and arch here, then will do testing on it rather than provison beaker system.
+        - string:
+            name: Password
+            default: QwAo2U6GRxyNPKiZaOCx
+            description: Optional, used for Testing_System, the default value above is beaker's default password, please modify it if needed, but please make sure correct password here.
+
+- job-template:
+    name: 'EntitlementRHN-Client_x86_64'
+    defaults: entitlement-rhn-base
+    node: entitlement
+    parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description:
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - choice:
+            name: RHN
+            choices:
+              - QA
+              - Stage
+              - Live
+            description: RHN QA(https://xmlrpc.rhn.qa.redhat.com/XMLRPC), RHN Stage(https://xmlrpc.rhn.stage.redhat.com/XMLRPC), RHN Live(https://xmlrpc.rhn.redhat.com/XMLRPC)
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Variant
+            choices:
+              - Client
+            description:
+        - choice:
+            name: Arch
+            choices:
+              - x86_64
+            description:
+        - string:
+            name: Testing_System
+            default:
+            description: Optional, fill in the hostname or IP of one system which has correct RHEL version and arch here, then will do testing on it rather than provison beaker system.
+        - string:
+            name: Password
+            default: QwAo2U6GRxyNPKiZaOCx
+            description: Optional, used for Testing_System, the default value above is beaker's default password, please modify it if needed, but please make sure correct password here.
+
+- job-template:
+    name: 'EntitlementRHN-Client_i386'
+    defaults: entitlement-rhn-base
+    node: entitlement
+    parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description:
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - choice:
+            name: RHN
+            choices:
+              - QA
+              - Stage
+              - Live
+            description: RHN QA(https://xmlrpc.rhn.qa.redhat.com/XMLRPC), RHN Stage(https://xmlrpc.rhn.stage.redhat.com/XMLRPC), RHN Live(https://xmlrpc.rhn.redhat.com/XMLRPC)
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Variant
+            choices:
+              - Client
+            description:
+        - choice:
+            name: Arch
+            choices:
+              - i386
+            description:
+        - string:
+            name: Testing_System
+            default:
+            description: Optional, fill in the hostname or IP of one system which has correct RHEL version and arch here, then will do testing on it rather than provison beaker system.
+        - string:
+            name: Password
+            default: QwAo2U6GRxyNPKiZaOCx
+            description: Optional, used for Testing_System, the default value above is beaker's default password, please modify it if needed, but please make sure correct password here.
+
+- job-template:
+    name: 'EntitlementRHN-Workstation_x86_64'
+    defaults: entitlement-rhn-base
+    node: entitlement
+    parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description:
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - choice:
+            name: RHN
+            choices:
+              - QA
+              - Stage
+              - Live
+            description: RHN QA(https://xmlrpc.rhn.qa.redhat.com/XMLRPC), RHN Stage(https://xmlrpc.rhn.stage.redhat.com/XMLRPC), RHN Live(https://xmlrpc.rhn.redhat.com/XMLRPC)
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Variant
+            choices:
+              - Workstation
+            description:
+        - choice:
+            name: Arch
+            choices:
+              - x86_64
+            description:
+        - string:
+            name: Testing_System
+            default:
+            description: Optional, fill in the hostname or IP of one system which has correct RHEL version and arch here, then will do testing on it rather than provison beaker system.
+        - string:
+            name: Password
+            default: QwAo2U6GRxyNPKiZaOCx
+            description: Optional, used for Testing_System, the default value above is beaker's default password, please modify it if needed, but please make sure correct password here.
+
+- job-template:
+    name: 'EntitlementRHN-Workstation_i386'
+    defaults: entitlement-rhn-base
+    node: entitlement
+    parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description:
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - choice:
+            name: RHN
+            choices:
+              - QA
+              - Stage
+              - Live
+            description: RHN QA(https://xmlrpc.rhn.qa.redhat.com/XMLRPC), RHN Stage(https://xmlrpc.rhn.stage.redhat.com/XMLRPC), RHN Live(https://xmlrpc.rhn.redhat.com/XMLRPC)
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Variant
+            choices:
+              - Workstation
+            description:
+        - choice:
+            name: Arch
+            choices:
+              - i386
+            description:
+        - string:
+            name: Testing_System
+            default:
+            description: Optional, fill in the hostname or IP of one system which has correct RHEL version and arch here, then will do testing on it rather than provison beaker system.
+        - string:
+            name: Password
+            default: QwAo2U6GRxyNPKiZaOCx
+            description: Optional, used for Testing_System, the default value above is beaker's default password, please modify it if needed, but please make sure correct password here.
+
+- job-template:
+    name: 'EntitlementRHN-ComputeNode_x86_64'
+    defaults: entitlement-rhn-base
+    node: entitlement
+    parameters:
+        - string:
+            name: Manifest_URL
+            default: http://hp-z220-11.qe.lab.eng.nay.redhat.com/projects/content-sku/rhn-sat5/PDCManifestGenerateTool/RHEL-6.8-20160414.0/dist/rhn-package-manifest/RHEL-6.8-20160414.0_RHN_manifest.json
+            description:
+        - string:
+            name: Distro
+            default: RHEL-6.8-20160414.0
+            description: Input the RHEL compose ID here, such as RHEL-6.8-20160414.0.
+        - choice:
+            name: RHN
+            choices:
+              - QA
+              - Stage
+              - Live
+            description: RHN QA(https://xmlrpc.rhn.qa.redhat.com/XMLRPC), RHN Stage(https://xmlrpc.rhn.stage.redhat.com/XMLRPC), RHN Live(https://xmlrpc.rhn.redhat.com/XMLRPC)
+        - choice:
+            name: Test_Level
+            choices:
+              - Basic
+              - Advanced
+            description: Select testing level(basic, advanced).
+        - choice:
+            name: Variant
+            choices:
+              - ComputeNode
+            description:
+        - choice:
+            name: Arch
+            choices:
+              - x86_64
+            description:
+        - string:
+            name: Testing_System
+            default:
+            description: Optional, fill in the hostname or IP of one system which has correct RHEL version and arch here, then will do testing on it rather than provison beaker system.
+        - string:
+            name: Password
+            default: QwAo2U6GRxyNPKiZaOCx
+            description: Optional, used for Testing_System, the default value above is beaker's default password, please modify it if needed, but please make sure correct password here.
+
+- job-group:
+    name: EntitlementRHNJobs
+    jobs:
+      - 'EntitlementRHN-Server_x86_64'
+      - 'EntitlementRHN-Server_i386'
+      - 'EntitlementRHN-Server_ppc64'
+      - 'EntitlementRHN-Server_ppc64le'
+      - 'EntitlementRHN-Server_aarch64'
+      - 'EntitlementRHN-Server_s390x'
+      - 'EntitlementRHN-Client_x86_64'
+      - 'EntitlementRHN-Client_i386'
+      - 'EntitlementRHN-Workstation_x86_64'
+      - 'EntitlementRHN-Workstation_i386'
+      - 'EntitlementRHN-ComputeNode_x86_64'
+
+- project:
+   name: EntitlementRHNJobsProject
+   jobs:
+    - EntitlementRHNJobs
+

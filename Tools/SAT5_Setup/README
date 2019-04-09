@@ -1,0 +1,66 @@
+##################################################
+#  Satellite Server 5.7 automation Installation  #
+##################################################
+
+This guide is how to use this tool to do Satellite Server5.7 automation installation.
+
+1. Update parameters from Properties.py file
+
+Update satellite installation ISO file
+#satellite_ISO = '/root/Satellite_Software/satellite-5.7.0-20150108-rhel-6-x86_64.iso'
+
+Update Satellite activate cert file for RHN
+#satellite_cert = "/home/Satellite_Software/satellite5.7_cert.crt"
+
+Update Satellite activate cert file for RHN QA
+#QA_satellite_cert = "/home/Satellite_Software/sat57QARHN-test-resigned.cert"
+
+Update answer file path ,there is a answers.txt under directory "entitlement-tests/Tools/SAT5_Setup/"
+#answerfile_path = "/root/entitlement-tests/Tools/SAT5_Setup/"
+
+2. Update "entitlement-tests/Tools/SAT5_Setup/answers.txt"
+
+#admin-email = yanpliu@redhat.com
+#rhn-username = qa@redhat.com
+#rhn-password = 5ZZaEeysLP5Fb9PM
+#ssl-set-city = Beijing
+#ssl-set-state = Haidian
+#ssl-set-country = CN
+#ssl-set-org = EntitlementQE
+#ssl-password = redhat
+#satellite-cert-file = /root/Satellite_Software/satellite5.7_cert.crt
+
+3. If the RHN & RHN QA account information change, you should update these information both in
+Properties.py and answers.txt
+
+Properties.py
+#[RHN information]
+account_rhn = {
+    "Live": {
+        "username": "qa@redhat.com",
+        "password": "5ZZaEeysLP5Fb9PM"
+    },
+    "QA": {
+        "username": "qa@redhat.com",
+        "password": "redhatqa"
+    }
+}
+server_url = {
+    "QA": "https://xmlrpc.rhn.qa.redhat.com/XMLRPC",
+    "Live": "https://xmlrpc.rhn.redhat.com/XMLRPC"
+}
+
+answers.txt
+rhn-username = qa@redhat.com
+rhn-password = 5ZZaEeysLP5Fb9PM
+
+
+
+4. Run the tool
+
+1) Install Satellite 5.7 Server for RHN Live
+# python SatelliteSetup.py -r Live  or  #python SatelliteSetup.py --rhn=Live
+2) Install Satellite 5.7 Server for RHN QA
+# python SatelliteSetup.py -r QA  or  #python SatelliteSetup.py --rhn=QA
+
+

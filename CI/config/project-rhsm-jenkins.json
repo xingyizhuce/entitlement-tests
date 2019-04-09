@@ -1,0 +1,22 @@
+{
+	"resources": [
+        {
+            "name": "ci-ops",
+            "flavor": "m1.medium",
+            "count": "1",
+            "image": "rhel-7.4-server-x86_64-released"
+        }
+    ],
+    "sites": [
+        {
+            "site": "ci-osp",
+            "endpoint": "https://ci-rhos.centralci.eng.rdu2.redhat.com:13000/v2.0",
+            "project": "rhsm-jenkins",
+            "username": "rhsm-jenkins",
+            "password": "dog8code",
+            "keypair": "content-sku",
+            "networks": ["rhsm-jenkins"],
+            "region": ""
+        }
+    ]
+}

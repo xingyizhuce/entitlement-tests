@@ -1,0 +1,36 @@
+---
+# https://github.com/CentOS-PaaS-SIG/linchpin/issues/682
+# empty credentials file required due to a bug
+simple:
+  topology:
+    topology_name: simple
+    resource_groups:
+      - resource_group_name: os-server-new
+        resource_group_type: openstack
+        resource_definitions:
+          - name: OPENSTACK_INSTANCE_NAME
+            role: os_server
+            flavor: m1.medium
+            image: rhel-7.6-server-x86_64-released
+            count: 1
+            keypair: ent-qe
+            fip_pool: 10.8.240.0
+            security_groups: default
+            networks:
+              - ent-qe
+        credentials:
+          filename: clouds.yaml
+          profile: cirhos
+  layout:
+    inventory_layout:
+      vars:
+        hostname: __IP__
+        ansible_ssh_private_key_file: ent-qe-entitlement-qe-jenkins
+      hosts:
+        example-node:
+          count: 1
+          host_groups:
+            - rhos_system
+            - certificate_authority
+            - jenkins_slave
+

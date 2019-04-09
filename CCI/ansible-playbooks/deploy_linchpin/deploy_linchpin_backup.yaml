@@ -1,0 +1,11 @@
+---
+- name: Deploy Linchpin and Testing Environment
+  hosts: rhos_system
+  tasks:
+    - name: Copy 
+      copy: 
+        src: ../../scripts/prepare_linchpin_slave.sh
+        dest: /tmp/
+
+    - name: Run prepare_linchpin_slave.sh to deploy
+      shell: bash /tmp/prepare_linchpin_slave.sh

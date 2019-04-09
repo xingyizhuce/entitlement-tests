@@ -1,0 +1,20 @@
+{
+    "resources": [
+        {
+	    "job_group": "jenkins-ci",
+            "recipesets": [
+                {
+                    "distro": "DISTRO",
+                    "arch": "aarch64",
+                    "variant": "Server",
+                    "keyvalue": ["DISKSPACE>=10000"],
+                    "hostrequire": ["arch=aarch64", "memory>=2000"],
+                    "bkr_data": {
+                        "role": "Testing",
+                        "name": "TestingMachine"
+                    }
+                }
+            ]
+        }
+   ]
+}

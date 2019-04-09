@@ -1,0 +1,118 @@
+- defaults:
+    name: entitlement-cdn-base
+    description: |
+        Purpose: Basic config for entitlement testing.
+    concurrent: true
+    scm:
+        - git:
+            url: 'http://git.app.eng.bos.redhat.com/git/entitlement-tests.git'
+            branches:
+                - origin/master
+            basedir: entitlement-tests
+            git-config-name: 'ftan'
+            git-config-email: 'ftan@redhat.com'
+    builders:
+        - shell: |
+            #!/bin/bash
+            export Release_Version=$Release_Version
+            export Compose_Version=$Compose_Version
+            export Product_Type=$Product_Type
+
+            env | grep "^PID="
+            if [ $? -eq 0 ]; then
+                export PID=$PID
+            else
+                export PID=$Product_ID
+            fi
+
+            if [ -z $Testing_System ]; then
+                # Modify bkr.json to provision suitable beaker system
+                PinFile=./entitlement-tests/CCI/Linchpin/beaker/simple/PinFile
+                if [ $Product_Type = "RHEL8" ]; then
+                  sed -i -e "s/DISTRO/$Distro/g" -e "s/ARCH/$Arch/g" -e "s/VARIANT/BaseOS/g" $PinFile
+                else
+                  sed -i -e "s/DISTRO/$Distro/g" -e "s/ARCH/$Arch/g" -e "s/VARIANT/$Variant/g" $PinFile
+                fi
+
+                # Provision testing system in beaker
+                source /home/jenkins/.venv/bin/activate
+                pushd entitlement-tests/
+                linchpin -w ./CCI/Linchpin/beaker/simple -vvvv up
+                PROVISION_STATUS=$?
+                deactivate
+
+                if [ "$PROVISION_STATUS" == 0 ]; then
+                  cat ./CCI/Linchpin/beaker/simple/resources/simple.output
+                  Testing_System=`python -c '''import json; print json.load(open("./CCI/Linchpin/beaker/simple/resources/simple.output"))["beaker_res"][0]["system"]'''`
+                  echo EXISTING_NODES=$Testing_System > ../RESOURCES.txt
+                fi
+                popd
+            else
+                # Write $Testing_System into file RESOURCES.txt
+                echo EXISTING_NODES=$Testing_System > RESOURCES.txt
+                PROVISION_STATUS=0
+            fi
+
+            if [ "$PROVISION_STATUS" == 0 ]; then
+                echo "Succeed to provison beaker system!"
+                pushd entitlement-tests/
+                . prepare.sh cdn
+                PREPARE_STATUS=$?
+                echo PREPARE_STATUS=$PREPARE_STATUS
+                popd
+                
+                if [ $PREPARE_STATUS -eq 0 ]; then 
+                    pushd entitlement-tests/
+                    
+                    # Get master_release and minor_release, and write them to enviroment variables
+                    release=`python Tools/RemoteSSH_scripts/get_release_info.py`
+                    export release=$release
+                    master_release=`python -c "import os; print os.environ['release'].split('.')[0]"`
+                    minor_release=`python -c "import os; print os.environ['release'].split('.')[1]"`
+                    export master_release=$master_release
+                    export minor_release=$minor_release
+                    
+                    # Replace qa@redhat.com's password
+                    sed -i "s/prod_password/VHVFhPS5TEG8dud9/g" ./CDN/json/account_info_cdn.json
+                    
+                    # Run tests with nosetests
+                    nosetests CDN/Tests/*.py --with-xunit --nocapture --xunit-file=../nosetests_original.xml
+                    #nosetests CDN/Tests/*.py --with-xunit --xunit-file=../nosetests_original.xml --logging-level=INFO --logging-format='%(asctime)s %(levelname)5s|%(filename)22s:%(lineno)4d|: %(message)s' --logging-datefmt="%Y-%m-%d"
+                    TEST_STATUS=$?
+                    popd
+
+                    # add test properties into nosetests.xml
+                    echo Prepare to add properies into nosetests.xml file.............
+                    python entitlement-tests/CI/polarion/add_polarion_properties_cdn_eus.py
+
+                    if [ $TEST_STATUS -ne 0 ]; then 
+                        echo "ERROR: Failed to do testing!"
+                        exit 1
+                    fi
+                else
+                    echo "ERROR: Failed to prepare testing!"
+                    exit 1
+                fi
+            else
+                echo "ERROR: Failed to provision beaker system!"
+                exit 1
+            fi
+    publishers:
+        - archive:
+            artifacts: '*.txt, *.json, *.xml, **/redhat.repo, **/**/**/*.log, **/manifest/*.xml, **/manifest/*.json'
+            allow-empty: 'true'
+        - ci-polarion-importer:
+            files: 'nosetests.xml'
+            wait: True
+            mark-failed: False
+            importer_url: 'https://polarion.engineering.redhat.com/polarion/import/xunit'
+            user: 'platformqe_machine'
+            password: 'polarion'
+            provider-name: 'Red Hat UMB'
+            override-topic: Consumer.rh-jenkins-ci-plugin.cb8a05ac-493c-42ee-9529-0aa113fc35ba.VirtualTopic.qe.ci.>
+            timeout: '60'
+    wrappers:
+        - ansicolor
+        - workspace-cleanup
+        - timestamps
+

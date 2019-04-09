@@ -1,0 +1,140 @@
+---
+- name: Deploy Linchpin and Testing Environment
+  hosts: rhos_system
+  vars:
+    WORKDIR: /home/jenkins
+    PYTHONLIB: /usr/lib64/python2.7/site-packages
+    BEAKER_CFG: /home/jenkins/entitlement-tests/CCI/Linchpin/beaker
+  tasks:
+    - name: Register and subscribe to Stage Candlepin
+      redhat_subscription:
+        server_hostname: subscription.rhsm.stage.redhat.com
+        auto_attach: yes
+        username: entitlement_testing
+        password: redhat
+
+    - name: Manage RHSM repositories
+      rhsm_repository:
+        name: rhel-7-server-optional-rpms
+        state: enabled
+
+    - name: Install Red Hat SSL certificates for Internal systems
+      uri:
+        url: "{{ item.URL }}"
+        dest: "{{ item.OUTPUT }}"
+        validate_certs: no
+      loop:
+        - URL: https://gitlab.corp.redhat.com/it-iam/idm-user-configs/raw/master/rhit-legacy-client/rhit-legacy-configs-1.0.0/yum.repos.d/it-iam.repo
+          OUTPUT: /etc/yum.repos.d/it-iam.repo
+        - URL: https://gitlab.corp.redhat.com/it-iam/idm-user-configs/raw/master/rhit-legacy-client/rhit-legacy-configs-1.0.0/rpm-gpg/RPM-GPG-KEY-redhat-git
+          OUTPUT: /tmp/RPM-GPG-KEY-redhat-git
+
+    - name: RPM import
+      rpm_key:
+        key: /tmp/RPM-GPG-KEY-redhat-git
+        state: present
+
+    - name: Install some requirements before Linchpin installation
+      yum:
+        name:
+          - wget
+          - git
+          - java-1.8.0-openjdk
+          - vim-enhanced
+          - python-virtualenv
+          - gcc
+          - krb5-devel
+          - libselinux-python
+          - libxml2-devel
+          - libxslt-devel
+          - libxslt-python
+          - libxslt-python
+          - rhit-legacy-configs
+
+    - name: Install pip package
+      easy_install:
+        name: pip
+
+    - name: Make the current directory.
+      file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - /etc/beaker
+        - "{{ WORKDIR }}"
+
+    - name: Download Linchpin code
+      git:
+        dest: "{{ WORKDIR }}/entitlement-tests"
+        repo: http://git.app.eng.bos.redhat.com/git/entitlement-tests.git
+        clone: yes
+
+
+    - name: Python virtualenv install requirements
+      pip:
+        chdir: "{{ WORKDIR }}"
+        name:
+          - git+https://github.com/RedHatQE/cinch.git@master
+          - yq
+          - linchpin[beaker]==1.6.2
+        virtualenv: .venv
+        virtualenv_command: virtualenv
+        virtualenv_site_packages: yes
+
+    - name: Python lib virtualenv
+      find:
+        paths: "{{ PYTHONLIB }}"
+        patterns: "*libxml2*,*libxslt*"
+        file_type: any
+        recurse: yes
+      register: copyfile
+
+    - name: Python virtualenv copy some files
+      copy:
+        src: "{{ item.path }}"
+        dest: "{{ WORKDIR }}/.venv/lib64/python2.7/site-packages"
+        remote_src: yes
+      with_items:
+        - "{{ copyfile.files }}"
+
+    - name: Python virtualenv copy selinux
+      shell: "cp -r {{ PYTHONLIB }}/*selinux {{ WORKDIR }}/.venv/lib64/python2.7/site-packages"
+
+    - name: Load Beaker client configurations
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        remote_src: yes
+      loop:
+        - src: "{{BEAKER_CFG}}/jenkins.keytab-entitlement-qe-jenkins.rhev-ci-vms.eng.rdu2.redhat.com"
+          dest: /etc/
+        - src: "{{BEAKER_CFG}}/beaker.conf"
+          dest: /etc/beaker/client.conf
+
+    - name: Generate /etc/yum.repos.d/manifest.repo in order to install packages kobo kobo-rpmlib koji...
+      blockinfile:
+        path: /etc/yum.repos.d/manifest.repo
+        create: yes
+        block: |
+          [manifest]
+          name=git install
+          failovermethod=priority
+          baseurl=http://dl.fedoraproject.org/pub/epel/7/x86_64/
+          enabled=1
+          gpgcheck=0
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$basearch
+        state: present
+
+    - name: Install kobo kobo-rpmlib koji
+      yum:
+        name:
+          - kobo
+          - kobo-rpmlib
+          - koji
+        skip_broken: yes
+
+    - name: Prepare testing envrionment
+      pip:
+        name:
+          - nose
+          - paramiko

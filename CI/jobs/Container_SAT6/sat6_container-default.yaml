@@ -1,0 +1,105 @@
+- defaults:
+    name: container-base
+    description: |
+        Purpose: Basic config for entitlement testing.
+    concurrent: true
+    scm:
+        - git:
+            url: 'http://git.app.eng.bos.redhat.com/git/ci-ops-central.git'
+            branches:
+                - origin/master
+            basedir: ci-ops-central
+            git-config-name: 'ftan'
+            git-config-email: 'ftan@redhat.com'
+        - git:
+            url: 'http://git.app.eng.bos.redhat.com/git/job-runner.git'
+            branches:
+                - origin/master
+            basedir: job-runner
+            git-config-name: 'ftan'
+            git-config-email: 'ftan@redhat.com'
+        - git:
+            url: 'http://git.app.eng.bos.redhat.com/git/entitlement-tests.git'
+            branches:
+                - origin/master
+            basedir: entitlement-tests
+            git-config-name: 'ftan'
+            git-config-email: 'ftan@redhat.com'
+    builders:
+        - shell: |
+            #!/bin/bash
+            # Set build name
+            echo "Host:$Product_Type"-"Container:$Container"-"CDN:$CDN" > build_name.txt
+
+            # Run kinit before provision to avoid the following errors
+            # krbV.Krb5Error: (-1765328189, 'No credentials cache found')
+            # krbV.Krb5Error: (-1765328188, 'Internal credentials cache error')
+            kinit -k -t $KEYTAB $PRINCIPAL
+
+            # Run klist before provision to make sure have a valid kerberos ticket
+            klist
+
+            # Modify bkr.json to provision suitable beaker system
+            bkr_path=entitlement-tests/CI/config/bkr-$Variant$Arch.json
+            sed -i -e "s/DISTRO/$Distro/g" $bkr_path
+            if [ "$Product_Type" == "RHEL8" ]; then
+                sed -i -e "s/Server/BaseOS/g" $bkr_path
+            fi
+
+            if [ -z $Testing_System ]; then
+                # Provision testing system in beaker
+                ci-ops-central/bootstrap/provision_resources.sh \
+                --site=qeos \
+                --project_defaults=entitlement-tests/CI/config/project-entitlement-qe-jenkins \
+                --topology=entitlement-tests/CI/config/bkr-$Variant$Arch \
+                --ssh_keyfile=entitlement-tests/CI/keys/ent-qe-entitlement-qe-jenkins \
+                --name=$Distro$Arch
+                PROVISION_STATUS=$?
+            else
+                # Write $System_IP into file RESOURCES.txt
+                echo EXISTING_NODES=$Testing_System > RESOURCES.txt
+                PROVISION_STATUS=0
+            fi
+
+            if [ "$PROVISION_STATUS" == 0 ]; then
+                echo "Succeed to provison beaker system!"
+                pushd entitlement-tests/
+                # Get and set System_IP
+                . prepare.sh container
+                # Get master_release and minor_release, and write them to enviroment variables
+                release=`python Tools/RemoteSSH_scripts/get_release_info.py`
+                export release=$release
+                master_release=`python -c "import os; print os.environ['release'].split('.')[0]"`
+                minor_release=`python -c "import os; print os.environ['release'].split('.')[1]"`
+                export master_release=$master_release
+                export minor_release=$minor_release
+
+                # Replace qa@redhat.com's password
+                sed -i "s/prod_password/VHVFhPS5TEG8dud9/g" ./CDN/json/account_info_cdn.json
+
+                # Run tests with nosetests
+                nosetests ./CDN/Container_Tests/Container_SAT6.py --with-xunit --nocapture --xunit-file=../nosetests_original.xml
+                TEST_STATUS=$?
+                popd
+
+                # add test properties into nosetests.xml
+                echo Preparing to update and add properies, and generate nosetests.xml file.............
+                python entitlement-tests/CI/polarion/add_polarion_properties_container.py
+
+                if [ $TEST_STATUS -ne 0 ]; then
+                    echo "ERROR: Failed to do testing!"
+                fi
+            else
+                echo "ERROR: Failed to provision beaker system!"
+            fi
+        - build-name-setter:
+            name: 'build_name.txt'
+            file: true
+    publishers:
+        - archive:
+            artifacts: '*.txt, *.xml, **/**/**/*.log'
+            allow-empty: 'true'
+    wrappers:
+        - ansicolor
+        - workspace-cleanup
+        - timestamps

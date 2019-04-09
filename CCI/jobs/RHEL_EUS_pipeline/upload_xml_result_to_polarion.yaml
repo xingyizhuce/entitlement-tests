@@ -1,0 +1,60 @@
+- job-template:
+    name: 'RHEL-EntitlementEUS_upload_xml_result_to_polarion'
+    node: entitlement
+    description: |
+        Purpose: Upload CDN testing xml result to polarion.
+    concurrent: true
+    parameters:
+        - string:
+            name: XML_URL
+            default:
+            description:
+    project-type: pipeline
+    dsl: |
+        import com.redhat.jenkins.plugins.ci.messaging.MessagingProviderOverrides;
+        MessagingProviderOverrides po = new MessagingProviderOverrides('Consumer.rh-jenkins-ci-plugin.cb8a05ac-493c-42ee-9529-0aa113fc35ba.VirtualTopic.qe.ci.>');
+        pipeline {{
+            agent {{ label "linchpin" }}
+            options {{
+                timestamps()
+                ansiColor('xterm')
+            }}
+            stages ((
+                stage('Preparation') {{
+                    steps {{
+                        cleanWs()
+                        sh '''#!/bin/bash
+                            git clone http://git.app.eng.bos.redhat.com/git/entitlement-tests.git
+
+                            wget --no-check-certificate $XML_URL -O nosetests.xml
+                        '''
+                    }}
+                }}
+                stage('ci-polarion-importer') {{
+                    steps {{
+                        importPolarionXUnit files: 'nosetests.xml',
+                            wait: false,
+                            mark: true,
+                            excludes: '',
+                            defaultExcludes: true,
+                            caseSensitive: true,
+                            server: 'https://polarion.engineering.redhat.com/polarion/import/xunit',
+                            user: 'platformqe_machine',
+                            password: hudson.util.Secret.fromString('polarion'),
+                            providerName: 'Red Hat UMB',
+                            overrides: po,
+                            timeout: 60
+                    }}
+                }}
+            }}
+            post {{
+                always {{
+                    archiveArtifacts artifacts: '*.xml'
+                }}
+            }}
+        }}
+
+- project:
+   name: RHEL-Entitlement_polarion_project
+   jobs:
+    - RHEL-EntitlementEUS_upload_xml_result_to_polarion

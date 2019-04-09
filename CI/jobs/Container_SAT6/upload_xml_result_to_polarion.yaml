@@ -1,0 +1,129 @@
+- job-template:
+    name: 'Container_upload_xml_result_to_polarion'
+    node: entitlement
+    description: |
+        Purpose: Merge and upload Container testing xml result to polarion.
+    concurrent: true
+    parameters:
+        - string:
+            name: Test_Product
+            default: RHEL80
+            description: Optional. Fill in the test product like 'RHEL80','RHEL76' which will be put into the polarion test run id. If this filed is empty, it will just use the test run id of the first merged xml.
+        - string:
+            name: XML_URL_1
+            default:
+            description:
+        - string:
+            name: XML_URL_2
+            default:
+            description:
+        - string:
+            name: XML_URL_3
+            default:
+            description:
+        - string:
+            name: XML_URL_4
+            default:
+            description:
+        - string:
+            name: XML_URL_5
+            default:
+            description:
+        - string:
+            name: XML_URL_6
+            default:
+            description:
+        - string:
+            name: XML_URL_7
+            default:
+            description:
+        - string:
+            name: XML_URL_8
+            default:
+            description:
+        - string:
+            name: XML_URL_9
+            default:
+            description:
+        - string:
+            name: XML_URL_10
+            default:
+            description:
+        - string:
+            name: XML_URL_11
+            default:
+            description:
+        - string:
+            name: XML_URL_12
+            default:
+            description:
+        - string:
+            name: XML_URL_13
+            default:
+            description:
+        - string:
+            name: XML_URL_14
+            default:
+            description:
+        - string:
+            name: XML_URL_15
+            default:
+            description:
+        - string:
+            name: XML_URL_16
+            default:
+            description:
+        - string:
+            name: XML_URL_17
+            default:
+            description:
+        - string:
+            name: XML_URL_18
+            default:
+            description:
+    project-type: pipeline
+    dsl: |
+        import com.redhat.jenkins.plugins.ci.messaging.MessagingProviderOverrides; MessagingProviderOverrides po = new MessagingProviderOverrides('Consumer.rh-jenkins-ci-plugin.cb8a05ac-493c-42ee-9529-0aa113fc35ba.VirtualTopic.qe.ci.>');
+        pipeline {{
+            agent {{ label 'entitlement' }}
+            options {{
+              timestamps()
+              ansiColor('xterm')
+            }}
+            stages {{
+              stage("Builder") {{
+                steps {{
+                    cleanWs()
+                    git url: 'http://git.app.eng.bos.redhat.com/git/entitlement-tests.git', branch: 'master'
+                    sh '''#!/bin/bash
+                       rm -rf xml
+                       mkdir xml
+                       pushd xml
+                       xml_url_list="$XML_URL_1 $XML_URL_2 $XML_URL_3 $XML_URL_4 $XML_URL_5 $XML_URL_6 $XML_URL_7 $XML_URL_8 $XML_URL_9 $XML_URL_10 $XML_URL_11 $XML_URL_12 $XML_URL_13 $XML_URL_14 $XML_URL_15 $XML_URL_16 $XML_URL_17 $XML_URL_18"
+                       for url in $xml_url_list; do
+                           wget --no-check-certificate $url
+                       done
+                       popd
+                       python CI/polarion/merge_polarion_xml_log.py xml/*
+                       '''
+                    archiveArtifacts artifacts: 'nosetests-final.xml'
+                    importPolarionXUnit files: 'nosetests-final.xml', \
+                      wait: true, \
+                      mark: true, \
+                      excludes: '', \
+                      defaultExcludes: true, \
+                      caseSensitive: true, \
+                      server: 'https://polarion.engineering.redhat.com/polarion/import/xunit', \
+                      user: 'platformqe_machine', \
+                      password: hudson.util.Secret.fromString('polarion'), \
+                      providerName: 'Red Hat UMB', \
+                      overrides: po, \
+                      timeout: 60
+                }}
+              }}
+            }}
+          }}
+- project:
+   name: Container_polarion_project
+   jobs:
+    - Container_upload_xml_result_to_polarion
