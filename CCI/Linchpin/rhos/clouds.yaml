@@ -1,7 +1,0 @@
-clouds:
-  cirhos:
-    auth:
-      auth_url: "https://ci-rhos.centralci.eng.rdu2.redhat.com:13000"
-      project_name: entitlement-qe-jenkins
-      username: entitlement-qe-jenkins
-      password: redhatci

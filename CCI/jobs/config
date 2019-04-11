@@ -1,7 +1,0 @@
-[jenkins]
-user=ftan
-password=eda785888b70149eeb7df7200a6999b7
-url=https://entitlement-qe-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/
-[__future__]
-param_order_from_yaml=True
-
